@@ -1,138 +1,118 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <stdint.h>
+
+#define MAX_PERSONS 10
+#define NAME_LEN 20
+#define FILE_NAME "text.txt"
 
 typedef struct {
+    char name[NAME_LEN];
+    int  age;
+    int  id;
+} Person;
 
-	char name[20];
-	int age;
-	int id;;
+static int loadPersons(Person *persons) {
+    FILE *file = fopen(FILE_NAME, "r");
+    if (!file) return 0;
 
-}osoba;
-
-int loadPersons(osoba* osoby) {
-	int count = 0;
-	FILE* file = fopen("text.txt", "r");
-	if (!file) return 0;
-
-	while ((fscanf(file, "%s %d %d", osoby[count].name, &osoby[count].age, &osoby[count].id) == 3))
-	{
-		count++;
-	}
-
-	fclose(file);
-
-	return count;
-
+    int count = 0;
+    while (count < MAX_PERSONS &&
+           fscanf(file, "%19s %d %d",
+                  persons[count].name,
+                  &persons[count].age,
+                  &persons[count].id) == 3) {
+        ++count;
+    }
+    fclose(file);
+    return count;
 }
 
-void savePersons(osoba osoby[], int licznik)
-{
-	FILE* file = fopen("text.txt", "w");
+static void savePersons(const Person *persons, int count) {
+    FILE *file = fopen(FILE_NAME, "w");
+    if (!file) return;
 
-	for (int i = 0; i < licznik; i++)
-	{
-		fprintf(file, "%s %d %d\n", osoby[i].name, osoby[i].age, osoby[i].id);
+    for (int i = 0; i < count; ++i)
+        fprintf(file, "%s %d %d\n",
+                persons[i].name,
+                persons[i].age,
+                persons[i].id);
 
-	}
-	fclose(file);
-
-
+    fclose(file);
 }
 
-void addPerson(osoba osoby[], int* ptr) {
-	printf("Podaj imie osoby: ");
-	scanf("%s", osoby[*ptr].name);
-	printf("Podaj wiek osoby: ");
-	scanf("%d", &osoby[*ptr].age);
-	printf("Podaj id osoby: ");
-	scanf("%d", &osoby[*ptr].id);
-	*ptr += 1;
-
-
+static void addPerson(Person *persons, int *count) {
+    if (*count >= MAX_PERSONS) {
+        puts("Brak miejsca na nowa osobe.");
+        return;
+    }
+    printf("Podaj imie osoby: ");
+    scanf("%19s", persons[*count].name);
+    printf("Podaj wiek osoby: ");
+    scanf("%d", &persons[*count].age);
+    printf("Podaj id osoby: ");
+    scanf("%d", &persons[*count].id);
+    ++(*count);
 }
 
-
-
-void showPersons(osoba osoby[], int* ptr)
-{
-	for (int i = 0; i < *ptr; i++)
-	{
-		printf("OSOBA %d\n", i + 1);
-		printf("%s ", osoby[i].name);
-		printf("%d lat", osoby[i].age);
-		printf("ID:%d ", osoby[i].id);
-		printf("\n");
-		printf("\n");
-	}
-
-
+static void showPersons(const Person *persons, int count) {
+    for (int i = 0; i < count; ++i)
+        printf("OSOBA %d\n%s %d lat ID:%d\n\n",
+               i + 1,
+               persons[i].name,
+               persons[i].age,
+               persons[i].id);
 }
 
-void deletePerson(osoba osoby[], int id, int* ptr)
-{
-	for (int i = 0; i < *ptr; i++)
-	{
-		if (osoby[i].id == id)
-		{
-			for (int j = i; i < *ptr; i++)
-			{
-				osoby[j] = osoby[j + 1];
-			}
-		}
-
-	}
-	*ptr -= 1;
+static void deletePerson(Person *persons, int *count, int id) {
+    for (int i = 0; i < *count; ++i) {
+        if (persons[i].id == id) {
+            for (int j = i; j < *count - 1; ++j)
+                persons[j] = persons[j + 1];
+            --(*count);
+            return;
+        }
+    }
+    puts("Nie znaleziono osoby o podanym id.");
 }
 
+int main(void) {
+    Person persons[MAX_PERSONS];
+    int count  = loadPersons(persons);
+    int choice = 0;
 
+    do {
+        puts("--------------");
+        puts("1. Pokaz uczniow");
+        puts("2. Dodaj ucznia");
+        puts("3. Usun ucznia");
+        puts("4. Wyjdz");
+        puts("--------------");
+        printf("Wybierz: ");
+        scanf("%d", &choice);
 
+        switch (choice) {
+            case 1:
+                showPersons(persons, count);
+                break;
+            case 2:
+                addPerson(persons, &count);
+                break;
+            case 3: {
+                int id;
+                printf("Podaj id do usuniecia: ");
+                scanf("%d", &id);
+                deletePerson(persons, &count, id);
+                break;
+            }
+            case 4:
+                puts("PROGRAM ZAKONCZONY");
+                break;
+            default:
+                puts("Niepoprawny wybor.");
+        }
+        savePersons(persons, count);
+    } while (choice != 4);
 
-int main()
-{
-	osoba osoby[10];
-	int licznik = loadPersons(osoby);
-	int id = 0;
-
-	int choice = 0;
-	do {
-		printf("--------------\n");
-		printf("1.Pokaz uczniow\n");
-		printf("2.Dodaj ucznia\n");
-		printf("3.Usun ucznia\n");
-		printf("4.Wyjdz\n");
-		printf("--------------\n");
-		printf("Wybierz:");
-		scanf("%d", &choice);
-
-		switch (choice)
-		{
-		case 1:showPersons(osoby, &licznik);
-			break;
-		case 2:addPerson(osoby, &licznik);
-			break;
-		case 3:
-
-			printf("\nKogo chcesz usunac: ");
-			scanf("%d", &id);
-			deletePerson(osoby, id, &licznik);
-			break;
-
-		case 4:
-			printf("PROGRAM ZAKONCZONY");
-			break;
-		case 7:
-			system("cls"); break;
-		}
-		savePersons(osoby, licznik);
-
-
-
-
-
-
-	} while (choice != 4);
-
+    return 0;
 }
