@@ -76,6 +76,19 @@ static void deletePerson(Person *persons, int *count, int id) {
     puts("Nie znaleziono osoby o podanym id.");
 }
 
+static void findPersonById(const Person *persons, int count, int id) {
+    for (int i = 0; i < count; ++i) {
+        if (persons[i].id == id) {
+            printf("Znaleziono:\n%s %d lat ID:%d\n",
+                   persons[i].name,
+                   persons[i].age,
+                   persons[i].id);
+            return;
+        }
+    }
+    puts("Nie znaleziono osoby o podanym id.");
+}
+
 int main(void) {
     Person persons[MAX_PERSONS];
     int count  = loadPersons(persons);
@@ -86,7 +99,8 @@ int main(void) {
         puts("1. Pokaz uczniow");
         puts("2. Dodaj ucznia");
         puts("3. Usun ucznia");
-        puts("4. Wyjdz");
+        puts("4. Znajdz ucznia po ID");
+        puts("5. Wyjdz");
         puts("--------------");
         printf("Wybierz: ");
         scanf("%d", &choice);
@@ -105,14 +119,21 @@ int main(void) {
                 deletePerson(persons, &count, id);
                 break;
             }
-            case 4:
+            case 4: {
+                int id;
+                printf("Podaj id do wyszukania: ");
+                scanf("%d", &id);
+                findPersonById(persons, count, id);
+                break;
+            }
+            case 5:
                 puts("PROGRAM ZAKONCZONY");
                 break;
             default:
                 puts("Niepoprawny wybor.");
         }
         savePersons(persons, count);
-    } while (choice != 4);
+    } while (choice != 5);
 
     return 0;
 }
