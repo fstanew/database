@@ -89,6 +89,21 @@ static void findPersonById(const Person *persons, int count, int id) {
     puts("Nie znaleziono osoby o podanym id.");
 }
 
+static void editPersonById(Person *persons, int count, int id) {
+    for (int i = 0; i < count; ++i) {
+        if (persons[i].id == id) {
+            printf("Podaj nowe imie: ");
+            scanf("%19s", persons[i].name);
+            printf("Podaj nowy wiek: ");
+            scanf("%d", &persons[i].age);
+            printf("Podaj nowe ID: ");
+            scanf("%d", &persons[i].id);
+            return;
+        }
+    }
+    puts("Nie znaleziono osoby o podanym id.");
+}
+
 int main(void) {
     Person persons[MAX_PERSONS];
     int count  = loadPersons(persons);
@@ -101,6 +116,7 @@ int main(void) {
         puts("3. Usun ucznia");
         puts("4. Znajdz ucznia po ID");
         puts("5. Wyjdz");
+        puts("6. Edytuj ucznia po ID");
         puts("--------------");
         printf("Wybierz: ");
         scanf("%d", &choice);
@@ -129,6 +145,13 @@ int main(void) {
             case 5:
                 puts("PROGRAM ZAKONCZONY");
                 break;
+            case 6: {
+                int id;
+                printf("Podaj id do edycji: ");
+                scanf("%d", &id);
+                editPersonById(persons, count, id);
+                break;
+            }
             default:
                 puts("Niepoprawny wybor.");
         }
